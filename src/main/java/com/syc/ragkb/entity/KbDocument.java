@@ -1,4 +1,4 @@
-package com.syc.rag.entity;
+package com.syc.ragkb.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;

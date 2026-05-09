@@ -1,4 +1,4 @@
-package com.syc.rag.config;
+package com.syc.ragkb.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,4 +1,4 @@
-package com.syc.rag.security;
+package com.syc.ragkb.security;
 
 /**
  * @author 粟英朝
