@@ -49,6 +49,7 @@ public class EmbeddingService {
 
         for (int i = 0; i < texts.size(); i++) {
             String cacheKey = buildCacheKey(texts.get(i));
+            //获取缓存
             String cachedStr = redisTemplate.opsForValue().get(cacheKey);
             if (cachedStr != null) {
                 cached.put(i, deserializeVector(cachedStr));

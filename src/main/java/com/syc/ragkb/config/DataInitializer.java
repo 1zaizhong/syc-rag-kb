@@ -61,6 +61,7 @@ public class DataInitializer implements ApplicationRunner {
         KbDocument saved = documentRepository.save(doc);
 
         String text = new String(content, StandardCharsets.UTF_8);
+        // 提交索引任务
         indexService.submitIndexTask(saved.getId(), text);
 
         log.info("[DataInit] 文档已提交索引：id={}, fileName={}", saved.getId(), fileName);

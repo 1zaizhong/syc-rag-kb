@@ -24,6 +24,7 @@ public class IndexService {
     private final KbDocumentRepository documentRepository;
     private final DocChunkRepository chunkRepository;
     private final IndexTaskRepository taskRepository;
+
     private final DocumentLoaderService loaderService;
     private final ChunkService chunkService;
     private final EmbeddingService embeddingService;
@@ -39,7 +40,8 @@ public class IndexService {
         task.setTaskType("INDEX");
         taskRepository.save(task);
 
-        // 捕获当前用户上下文，传递给异步线程（ThreadLocal 不能跨线程）
+        // 捕获当前用户上下文，
+        // 传递给异步线程（ThreadLocal 不能跨线程）
         taskLauncher.launchWithText(task.getId(), docId, textContent,
                 UserContext.getUserId(), UserContext.getDepartmentId(), UserContext.getRole());
     }
@@ -64,6 +66,7 @@ public class IndexService {
         KbDocument doc = documentRepository.findById(docId).orElseThrow();
         try {
             byte[] fileBytes = minioStorageService.download(doc.getMinioPath());
+            //加载文档
             ParseResult parseResult = loaderService.load(
                     new ByteArrayInputStream(fileBytes), doc.getFileName());
             doIndex(taskId, docId, doc, parseResult);
@@ -97,6 +100,7 @@ public class IndexService {
      * 只有当新向量算完、确定能写入了，才去删旧数据。
      */
     private void doIndex(Long taskId, Long docId, KbDocument doc, ParseResult parseResult) {
+        //修改任务状态和文档状态
         updateTaskStatus(taskId, IndexTask.TaskStatus.RUNNING);
         updateDocStatus(docId, KbDocument.DocumentStatus.PROCESSING);
 
@@ -135,9 +139,12 @@ public class IndexService {
                 docChunk.setTokenCount(chunk.getEstimatedTokens());
                 docChunk.setDocVersion(doc.getVersion());
                 docChunks.add(docChunk);
+                //总token
                 totalTokens += chunk.getEstimatedTokens();
+                log.info("[IndexService] docId={}，chunk={}，tokens={}",
+                        docId, chunk.getChunkIndex(), chunk.getEstimatedTokens());
             }
-
+            //批量写入数据库
             batchInsertChunks(docChunks);
 
             // 第五步：更新文档状态
